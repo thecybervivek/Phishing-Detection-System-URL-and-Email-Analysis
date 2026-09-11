@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phishing Detection System</title>
+<style>
+body{font-family:Arial,sans-serif;background:#071426;color:#eef5ff;margin:0}
+main{max-width:800px;margin:35px auto;padding:20px}.card{background:#102541;border:1px solid #31537c;border-radius:18px;padding:28px}
+h1{margin-top:0}.sub{color:#a9bed8}textarea{width:100%;box-sizing:border-box;min-height:150px;padding:13px;border-radius:10px;border:1px solid #4b6c8d;background:#071426;color:#fff;font-size:15px}
+.tabs button,.analyze{padding:11px 16px;border:0;border-radius:8px;margin:5px 5px 15px 0;background:#294a6f;color:#fff}.active,.analyze{background:#70c7ff!important;color:#071426!important;font-weight:700}
+.result{margin-top:20px;background:#09192d;border-radius:12px;padding:18px}.score{font-size:36px;font-weight:800}.tag{font-weight:700;font-size:19px}li{margin:8px 0}.note{color:#9eb4ce;font-size:13px;margin-top:20px}
+</style></head>
+<body><main><div class="card">
+<h1>🛡️ Phishing Detection System</h1>
+<p class="sub">Heuristic URL and email/text analysis for cybersecurity learning.</p>
+<div class="tabs"><button id="urlBtn" class="active" onclick="setMode('url')">URL Analysis</button><button id="emailBtn" onclick="setMode('email')">Email Analysis</button></div>
+<textarea id="input" placeholder="Enter a URL, e.g. https://example.com/login"></textarea>
+<br><button class="analyze" onclick="analyze()">Analyze</button>
+<div id="result"></div>
+<p class="note">This is a heuristic demo, not a replacement for browser reputation services, sandboxing, SPF/DKIM/DMARC validation, or a commercial phishing engine. Do not open suspicious links.</p>
+</div></main>
+<script>
+let mode='url';
+function setMode(m){
+ mode=m;
+ document.getElementById('urlBtn').classList.toggle('active',m==='url');
+ document.getElementById('emailBtn').classList.toggle('active',m==='email');
+ document.getElementById('input').placeholder=m==='url'?'Enter a URL, e.g. https://example.com/login':'Paste an email/message for analysis...';
+}
+async function analyze(){
+ const text=document.getElementById('input').value;
+ const box=document.getElementById('result');
+ box.innerHTML='<div class="result">Analyzing...</div>';
+ const r=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode,text})});
+ const d=await r.json();
+ if(d.error){box.innerHTML='<div class="result">'+d.error+'</div>';return;}
+ box.innerHTML='<div class="result"><div class="score">'+d.score+'/100</div><div class="tag">'+d.verdict+'</div><p><b>Analysis type:</b> '+d.type+'</p><h3>Detected indicators</h3><ul>'+d.indicators.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>';
+}
+</script></body></html>
